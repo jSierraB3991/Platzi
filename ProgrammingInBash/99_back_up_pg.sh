@@ -21,24 +21,19 @@ do
     case $opcion in
         1)
             echo -e "\nInstalling postgres....."
-            sleep 3
-            ;;
+            sleep 3;;
         2) 
             echo -e "\nUninstalling postgres...."
-            sleep 3
-            ;;
+            sleep 3;;
         3) 
             echo -e "\nDoing Backup..."
-            sleep 3
-            ;;
+            sleep 3;;
         4) 
             echo -e "\nShowing Backup..."
-            sleep 3
-            ;;
+            sleep 3;;
         5)  
             echo -e "\nExit Program"
-            exit 0
-            ;;
+            exit 0;;
     esac
 done    
 
