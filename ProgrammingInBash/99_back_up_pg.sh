@@ -11,10 +11,12 @@ function unistall_postgre() {
 }
 
 function do_backup() {
-    echo -e "\nDoing Backup..."
+    back_up_directory=$1
+    echo "Doing Backup... $back_up_directory"
 }
 function show_backup() {
-    echo -e "\nShowing Backup..."
+    back_up_directory=$1
+    echo "Showing Backup... $back_up_directory"
 }
 
 while :
@@ -38,9 +40,13 @@ do
 
         2) unistall_postgre;;
 
-        3) do_backup;;
+        3) echo -e "\n"
+            read -p "directory of backup: " back_up_directory
+            do_backup $back_up_directory;;
 
-        4) show_backup;;
+        4) echo -e "\n"
+            read -p "directory of backup: " back_up_directory
+            show_backup $back_up_directory;;
 
         5)  echo -e "\nExit Program"
             exit 0;;
