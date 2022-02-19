@@ -2,6 +2,21 @@
 
 option=''
 
+function install_postgre() {
+    echo -e "\nInstalling postgres....."
+}
+
+function unistall_postgre() {
+    echo -e "\nUninstalling postgres...."
+}
+
+function do_backup() {
+    echo -e "\nDoing Backup..."
+}
+function show_backup() {
+    echo -e "\nShowing Backup..."
+}
+
 while :
 do
     clear
@@ -19,21 +34,17 @@ do
     read -n1 -p "Choose the option [1-5]: " opcion
 
     case $opcion in
-        1)
-            echo -e "\nInstalling postgres....."
-            sleep 3;;
-        2) 
-            echo -e "\nUninstalling postgres...."
-            sleep 3;;
-        3) 
-            echo -e "\nDoing Backup..."
-            sleep 3;;
-        4) 
-            echo -e "\nShowing Backup..."
-            sleep 3;;
-        5)  
-            echo -e "\nExit Program"
+        1) install_postgre;;
+
+        2) unistall_postgre;;
+
+        3) do_backup;;
+
+        4) show_backup;;
+
+        5)  echo -e "\nExit Program"
             exit 0;;
     esac
+    sleep 3
 done    
 
