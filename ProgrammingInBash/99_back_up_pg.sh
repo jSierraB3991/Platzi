@@ -131,7 +131,6 @@ function show_backup() {
             sudo -u postgres pg_restore -Fc -d $db_destiny "$back_up_directory/$backuping"
             echo "Lis of database names"
             sudo -u postgres psql -c "\l"
-        # echo "Showing Backup... $back_up_directory"
         else
            echo "The backup $backuping not exists"
         fi
