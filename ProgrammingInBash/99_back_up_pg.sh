@@ -116,13 +116,12 @@ function show_backup() {
         read -p "Choose backup to backuping: " backuping
 
         if [ -f $back_up_directory/$backuping ]; then
-            cd /
+            cd / 
+
             sudo -u postgres psql -c "\l"
-            cd -
             read -p "name of data base destiny: " db_destiny
 
-            db_name=$(cd / && sudo -u postgres psql -lqt | grep "$db_destiny" | awk '{print $1}' )
-            cd -
+            db_name=$(sudo -u postgres psql -lqt | grep "$db_destiny" | awk '{print $1}' )
             if [ "$db_name" != "$db_destiny" ]; then
                 sudo -u postgres psql -c "CREATE DATABASE $db_destiny"
             fi
@@ -131,6 +130,8 @@ function show_backup() {
             sudo -u postgres pg_restore -Fc -d $db_destiny "$back_up_directory/$backuping"
             echo "Lis of database names"
             sudo -u postgres psql -c "\l"
+            
+            cd -
         else
            echo "The backup $backuping not exists"
         fi
