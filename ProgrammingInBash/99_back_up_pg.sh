@@ -77,24 +77,23 @@ function do_backup() {
 
         cd /
         sudo -u postgres psql -c "\l"
-        cd -
 
         read -p "Choose database to backup: " db_backup
         
         if [ ! -d $back_up_directory ]; then
-            mkdir $back_up_directory
+            mkdir -m 755 $back_up_directory
         fi
         
         if [ -d $back_up_directory ]; then
             echo "Doing Backup... $back_up_directory"
             name_backup="db_backup_$(date +%s).bak"
-            cd /
-            sudo -u postgres pg_dump -Fc $db_backup > "$back_up_directory/$name_backup"
-            cd -
             
+            sudo -u postgres pg_dump -Fc $db_backup > "$back_up_directory/$name_backup"
             echo "permiss of directory"
             sudo chmod 755 $back_up_directory
             echo "Backup Ok in $back_up_directory/$name_backup"
+
+            cd -
         else
             echo -e "The directory $back_up_directory not exists"
         fi
