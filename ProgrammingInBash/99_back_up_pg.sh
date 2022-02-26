@@ -4,8 +4,13 @@ option=''
 
 install_on_debian_based() {
     sudo apt update
-    sudo apt upgrade -y
-    sudo apt install postgresql postgresql-contrib
+    if [ "$(hostnamectl | grep Operating | awk '{print $3}')" == "Parrot" ]; then
+	sudo parrot-upgrade
+    else
+	sudo apt upgrade -y
+    fi
+
+    sudo apt install postgresql postgresql-contrib -y
 }
 
 install_on_arch_based() {
@@ -50,91 +55,138 @@ unistall_in_debian_based() {
 }
 
 unistall_in_arch_based() {
-    sudo pacman -Rsn postgresql
+    sudo pacman -Rsn postgresql --noconfirm
 }
 
 function unistall_postgre() {
-    echo -e "\nUninstalling postgres...."
-    sudo systemctl stop postgresql.service
+    echo -e "\nVerifing Postgre"
+    if [ "$(which psql)" == "" ]; then
+        echo "Postgres not is install"
+    else
+	echo -e "\nUninstalling postgres...."
+        sudo systemctl stop postgresql.service
     
-    if [ "$(which apt)" != "" ]; then
-        unistall_in_debian_based
-    elif [ "$(which pacman)" != "" ]; then
-        install_on_arch_based
-    fi
+        if [ "$(which apt)" != "" ]; then
+            unistall_in_debian_based
+        elif [ "$(which pacman)" != "" ]; then
+            install_on_arch_based
+        fi
 
-    sudo rm -r /var/lib/postgres
-    sudo userdel -r postgres
-    sudo groupdel postgresql
+        sudo rm -r /var/lib/postgres
+        sudo userdel -r postgres
+        sudo groupdel postgresql
+    fi
     echo -e "\n"
     read -n1 -p "press any key to continue"
 }
 
-function do_backup() {
+function verify_service() {
+
     if [ "$(which psql)" != "" ]; then
-        back_up_directory=$1
+        state_service=$(systemctl status postgresql | grep Active | awk '{print $2}')
 
-        cd /
-        sudo -u postgres psql -c "\l"
-
-        read -p "Choose database to backup: " db_backup
-        
-        if [ ! -d $back_up_directory ]; then
-            mkdir -m 755 $back_up_directory
-        fi
-        
-        if [ -d $back_up_directory ]; then
-            echo "Doing Backup... $back_up_directory"
-            name_backup="db_backup_$(date +%s).bak"
-            
-            sudo -u postgres pg_dump -Fc $db_backup > "$back_up_directory/$name_backup"
-            echo "permiss of directory"
-            sudo chmod 755 $back_up_directory
-            echo "Backup Ok in $back_up_directory/$name_backup"
-
-            cd -
-        else
-            echo -e "The directory $back_up_directory not exists"
-        fi
-
+	if [ "$state_service" == "inactive" ]; then
+	    echo "You have active postgresql service"
+	    return 0
+	fi
+	return 1
     else
-        echo -e "Postgresql is not install"
+	echo "You don't have installing postgresql"
+	return 0
     fi
+    return 0
+}
 
+function do_backup() {
+    verify_service
+    if [ "$?" == "1" ]; then
+
+        read -p "directory of backup: " back_up_directory
+	if [ "$(which psql)" != "" ]; then
+	    back_up_directory=$1
+
+            cd /
+	    sudo -u postgres psql -c "\l"
+
+	    read -p "Choose database to backup: " db_backup
+        
+            if [ ! -d $back_up_directory ]; then
+	        mkdir -m 755 $back_up_directory
+	    fi
+        
+            if [ -d $back_up_directory ]; then
+	        echo "Doing Backup... $back_up_directory"
+	        name_backup="db_backup_$(date +%s).bak"
+            
+		sudo -u postgres pg_dump -Fc $db_backup > "$back_up_directory/$name_backup"
+                echo "permiss of directory"
+	        sudo chmod 755 $back_up_directory
+	        echo "Backup Ok in $back_up_directory/$name_backup"
+
+		cd -
+            else
+	        echo -e "The directory $back_up_directory not exists"
+	    fi
+
+        else
+	    echo -e "Postgresql is not install"
+        fi
+    fi
     read -n1 -p "press any key to continue"
     echo -e "\n"
 }
 function show_backup() {
-    back_up_directory=$1
+    verify_service
+    if [ "$?" == "1"  ]; then
+	read -p "directory of backup: " back_up_directory
 
-    if [ -d $back_up_directory ]; then
+	if [ -d $back_up_directory ]; then
 
-        echo "backup list"
-        ls $back_up_directory | grep "**.bak"
-        read -p "Choose backup to backuping: " backuping
+            echo "backup list"
+	    ls $back_up_directory | grep "**.bak"
+	    read -p "Choose backup to backuping: " backuping
 
-        if [ -f $back_up_directory/$backuping ]; then
-            cd / 
+            if [ -f $back_up_directory/$backuping ]; then
+	        cd / 
 
-            sudo -u postgres psql -c "\l"
-            read -p "name of data base destiny: " db_destiny
+                sudo -u postgres psql -c "\l"
+	        read -p "name of data base destiny: " db_destiny
 
-            db_name=$(sudo -u postgres psql -lqt | grep "$db_destiny" | awk '{print $1}' )
-            if [ "$db_name" != "$db_destiny" ]; then
-                sudo -u postgres psql -c "CREATE DATABASE $db_destiny"
-            fi
+	        db_name=$(sudo -u postgres psql -lqt | grep "$db_destiny" | awk '{print $1}' )
+		if [ "$db_name" != "$db_destiny" ]; then
+		    sudo -u postgres psql -c "CREATE DATABASE $db_destiny"
+                fi
 
-            echo "backuping in the data base $db_destiny"
-            sudo -u postgres pg_restore -Fc -d $db_destiny "$back_up_directory/$backuping"
-            echo "Lis of database names"
-            sudo -u postgres psql -c "\l"
+                echo "backuping in the data base $db_destiny"
+	        sudo -u postgres pg_restore -Fc -d $db_destiny "$back_up_directory/$backuping"
+	        echo "Lis of database names"
+		sudo -u postgres psql -c "\l"
             
-            cd -
-        else
-           echo "The backup $backuping not exists"
+                cd -
+	    else
+	       echo "The backup $backuping not exists"
+            fi
+	else
+	    echo "The directory $back_up_directory not exists"
         fi
-    else
-        echo "The directory $back_up_directory not exists"
+    fi
+    read -n1 -p "press any key to continue"
+    echo -e "\n"
+}
+
+function start_service() {
+
+    if [ "$(which psql)" != "" ]; then
+        state_service=$(systemctl status postgresql | grep Active | awk '{print $2}')
+
+	if [ "$state_service" == "inactive" ]; then
+	    echo "Starting service of postgresql"
+            sudo systemctl start postgresql
+	else
+	    echo "The Service postgresql in active"
+        fi
+    else 
+	echo "You not installing postgresql"
     fi
     read -n1 -p "press any key to continue"
     echo -e "\n"
@@ -152,9 +204,10 @@ do
     echo "2. UnInstall Postgres"
     echo "3. Do Backup"
     echo "4. Show Backup"
-    echo "5. exit"
+    echo "5. Start service of postgre"
+    echo "6. exit"
 
-    read -n1 -p "Choose the option [1-5]: " opcion
+    read -n1 -p "Choose the option [1-6]: " opcion
 
     case $opcion in
         1) install_postgre;;
@@ -162,14 +215,15 @@ do
         2) unistall_postgre;;
 
         3) echo -e "\n"
-            read -p "directory of backup: " back_up_directory
-            do_backup $back_up_directory;;
+	    do_backup;;
 
         4) echo -e "\n"
-            read -p "directory of backup: " back_up_directory
-            show_backup $back_up_directory;;
+	    show_backup;;
 
-        5)  echo -e "\nExit Program"
+        5) echo -e "\n"
+	    start_service;;
+
+        6)  echo -e "\nExit Program"
             exit 0;;
     esac
 done    
