@@ -50,8 +50,7 @@ unistall_in_debian_based() {
 }
 
 unistall_in_arch_based() {
-    sudo pacman -R postgresql
-    sudo pacman -R postgresql-libs
+    sudo pacman -Rsn postgresql
 }
 
 function unistall_postgre() {
