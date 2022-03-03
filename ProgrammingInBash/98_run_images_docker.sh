@@ -79,7 +79,7 @@ function verify_container() {
 
 function run_mongo_inscription() {
     echo -e "\e[32mRUN CONTAINER mongo-inscription\e[0m"
-    sudo docker run --rm -d -p 27017:27017 --name mongo-inscription mongo:5.0.3-focal
+    sudo $(what_container) run --rm -d -p 27017:27017 --name mongo-inscription mongo:5.0.3-focal
 }
 
 function run-postgre-database(){
@@ -102,19 +102,19 @@ function pg_docker_dbs() {
 
 function queue_activemq() {
     echo -e "\e[32mRUN CONTAINER activemq\e[0m"
-    sudo docker run --rm --name activemq -d -p 8161:8161 -p 61616:61616 rmohr/activemq:5.14.0-alpine
+    sudo $(what_container) run --rm --name activemq -d -p 8161:8161 -p 61616:61616 rmohr/activemq:5.14.0-alpine
 }
 
 function zookeeper_kafka() {
 
     container_provider=$(what_container)
-    script_docker="sudo $container_provider ps --format {{.ID}}\t{{.Names}}"
-    id_container_of_zookeper=$($script_docker | grep zookeeper | awk '{print $1}' )
-    id_container_of_kafka=$($script_docker | grep kafka | awk '{print $1}' )
+    script_container="sudo $container_provider ps --format {{.ID}}\t{{.Names}}"
+    id_container_of_zookeper=$($script_container | grep zookeeper | awk '{print $1}' )
+    id_container_of_kafka=$($script_container | grep kafka | awk '{print $1}' )
 
     if [ "$id_container_of_zookeper" == "" ]; then
     echo -e "\e[32mRUN CONTAINER Zookeeper\e[0m"
-        sudo docker run --rm --name zookeeper -d -p 2181:2181 wurstmeister/zookeeper
+        sudo $container_provider run --rm --name zookeeper -d -p 2181:2181 wurstmeister/zookeeper
     else
         echo "The container of Zookeeper zookeeper is already exists"
     fi
@@ -135,10 +135,11 @@ function zabud_discovery() {
     if [ ! -f $ZABUD_HOME/zabud-discovery-ms/Dockerfile ]; then
         cp $DOT_FILES/Docker/spring-Dockerfile ./Dockerfile
     fi
+    container_provider=$(what_container)
 
     application="zabud-discovery"
     version="1.0"
-    dockerimage=$(sudo docker images --format "{{.Repository}}" $application:$version)
+    dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $application:$version)
     if [ "$dockerimage" == "" ]; then
         read -p "you image $application:$version not exists, Dou you like build image?: " response
 
@@ -148,13 +149,13 @@ function zabud_discovery() {
            [ $response == "S" ]; then
             cd $ZABUD_HOME/zabud-discovery-ms
             echo -e "\e[32mGenerate Image zabud-discovery\e[0m"
-            sudo sudo docker build -t zabud-discovery:1.0 .
+            sudo $container_provider build -t zabud-discovery:1.0 .
         fi
     fi
-    dockerimage=$(sudo docker images --format "{{.Repository}}" $application:$version)
+    dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $application:$version)
     if [ "$dockerimage" != "" ]; then
         echo -e "\e[32mRUN CONTAINER $application\e[0m"
-        sudo docker run --rm -d -p 8761:8761 --name $application $application:$version
+        sudo $container_provider run --rm -d -p 8761:8761 --name $application $application:$version
     fi
 }
 
@@ -193,7 +194,7 @@ elif [ $# -eq 2 ] && [ "$1" == "-r" ]; then
         "queue_activemq") verify_container activemq queue_activemq;;
         "zookeeper_kafka") zookeeper_kafka;;
         "zabud_discovery") verify_container zabud-discovery zabud_discovery;;
-        *)  error_to_help "The docker container $2 not configurate";;
+        *)  error_to_help "The container $2 not configurate";;
     esac
 
 else
