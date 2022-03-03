@@ -159,7 +159,7 @@ function zabud_discovery() {
 }
 
 function run_help() {
-    echo -e "\nrun-zabud_images [-r [OPTIONS]]" \
+    echo -e "\nrun-zabud_images.sh [-r [OPTIONS]]" \
         "\noptions | containers configurate:" \
         "\n\tmongo_inscription" \
         "\n\tpg_docker_dbs | zabud-inscription, zabud-core and zabud-notification" \
