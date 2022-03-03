@@ -69,7 +69,7 @@ function verify_container() {
             done
             $function
         else
-            echo "Canceling run of container $container"
+            echo -e "\e[31mCanceling run of container $container\e[0m"
         fi
     else
         remove_stop_container $container
@@ -159,7 +159,7 @@ function zabud_discovery() {
 }
 
 function run_help() {
-    echo -e "\nrun-zabud_images.sh [-r [OPTIONS]]" \
+    echo -e "\nrun_zabud_images.sh [-r [OPTIONS]]" \
         "\noptions | containers configurate:" \
         "\n\tmongo_inscription" \
         "\n\tpg_docker_dbs | zabud-inscription, zabud-core and zabud-notification" \
