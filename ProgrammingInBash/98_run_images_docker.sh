@@ -2,6 +2,13 @@
 
 folder=$(echo "${PWD}")
 
+if [ -z $ZABUD_HOME ]; then
+    echo "I Need enviroment varible ZABUD_HOME"
+fi
+if [ -z $DOT_FILES ]; then
+    echo "I Need enviroment varible DOT_FILES"
+fi
+
 function what_container() {
     if [ "$(which docker)" != "" ]; then
         echo "docker"
