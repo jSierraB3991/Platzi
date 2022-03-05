@@ -2,12 +2,7 @@
 
 folder=$(echo "${PWD}")
 
-if [ -z $ZABUD_HOME ]; then
-    echo "I Need enviroment varible ZABUD_HOME"
-fi
-if [ -z $DOT_FILES ]; then
-    echo "I Need enviroment varible DOT_FILES"
-fi
+
 
 function what_container() {
     if [ "$(which docker)" != "" ]; then
@@ -157,6 +152,7 @@ function zabud_discovery() {
         echo -e "\e[32mRUN CONTAINER $application\e[0m"
         sudo $container_provider run --rm -d -p 8761:8761 --name $application $application:$version
     fi
+    cd $folder
 }
 
 function run_help() {
@@ -174,31 +170,37 @@ function error_to_help() {
     run_help
 }
 
-if [ $# -eq 0 ]; then
-    verify_container mongo-inscription run_mongo_inscription
-    pg_docker_dbs
-    verify_container activemq queue_activemq
-    zookeeper_kafka
-    verify_container zabud-discovery zabud_discovery
-
-elif [ $# -eq 1 ]; then
-    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-        run_help
-    else
-        error_to_help "The paramater $1 not exists"
-    fi
-elif [ $# -eq 2 ] && [ "$1" == "-r" ]; then
-    case $2 in
-        "mongo_inscription") verify_container mongo-inscription run_mongo_inscription;;
-        "pg_docker_dbs") pg_docker_dbs;;
-        "queue_activemq") verify_container activemq queue_activemq;;
-        "zookeeper_kafka") zookeeper_kafka;;
-        "zabud_discovery") verify_container zabud-discovery zabud_discovery;;
-        *)  error_to_help "The container $2 not configurate";;
-    esac
-
+if [ -z $ZABUD_HOME ]; then
+    echo "I Need enviroment varible ZABUD_HOME"
+elif [ -z $DOT_FILES ]; then
+    echo "I Need enviroment varible DOT_FILES"
 else
-    error_to_help "Acction Failed $1 $2"
-fi
+    if [ $# -eq 0 ]; then
+        verify_container mongo-inscription run_mongo_inscription
+        pg_docker_dbs
+        verify_container activemq queue_activemq
+        zookeeper_kafka
+        verify_container zabud-discovery zabud_discovery
 
-cd $folder
+    elif [ $# -eq 1 ]; then
+        if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+            run_help
+        else
+            error_to_help "The paramater $1 not exists"
+        fi
+    elif [ $# -eq 2 ] && [ "$1" == "-r" ]; then
+        case $2 in
+            "mongo_inscription") verify_container mongo-inscription run_mongo_inscription;;
+            "pg_docker_dbs") pg_docker_dbs;;
+            "queue_activemq") verify_container activemq queue_activemq;;
+            "zookeeper_kafka") zookeeper_kafka;;
+            "zabud_discovery") verify_container zabud-discovery zabud_discovery;;
+            *)  error_to_help "The container $2 not configurate";;
+        esac
+
+    else
+        error_to_help "Acction Failed $1 $2"
+    fi
+
+
+fi
