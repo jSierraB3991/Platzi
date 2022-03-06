@@ -142,11 +142,8 @@ function do_backup() {
 
         read -p "directory of backup: " back_up_directory
 	if [ "$(which psql)" != "" ]; then
-	    back_up_directory=$1
-
             cd /
 	    sudo -u postgres psql -c "\l"
-
 	    read -p "Choose database to backup: " db_backup
         
             if [ ! -d $back_up_directory ]; then
@@ -161,12 +158,10 @@ function do_backup() {
                 echo "permiss of directory"
 	        sudo chmod 755 $back_up_directory
 	        echo "Backup Ok in $back_up_directory/$name_backup"
-
-		cd -
             else
 	        echo -e "The directory $back_up_directory not exists"
 	    fi
-
+	    cd -
         else
 	    echo -e "Postgresql is not install"
         fi
