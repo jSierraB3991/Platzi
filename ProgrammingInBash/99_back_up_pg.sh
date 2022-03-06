@@ -19,6 +19,26 @@ install_on_arch_based() {
     sudo -i -u postgres initdb -D '/var/lib/postgres/data'
 }
 
+function enable_postgre_service_systemd() {
+    sudo systemctl enable postgresql.service
+}
+
+function enable_postgre_service_open_rc() {
+    sudo rc-update add postgresql default
+}
+
+function decide_init_and_run_function() {
+    function_systemd=$1
+    function_open_rc=$2
+
+    init=$(cat /proc/1/comm)
+    if [ "$init" == "systemd" ]; then
+        $function_systemd
+    elif [ "$init" == "openrc" ] || [ "$init" == "openrc-init" ]
+        $function_open_rc
+    fi
+}
+
 function install_postgre() {
 
     echo -e "\nVerifing Postgre"
@@ -42,7 +62,7 @@ function install_postgre() {
         
         read -n1 -p "¿You want enable postgre service [Y/n] ?" enable_postgre
         if [ "$enable_postgre" == "Y" ] || [ "$enable_postgre" == "y" ] || [ "$enable_postgre" == "" ]; then
-            sudo systemctl enable postgresql.service
+            decide_init_and_run_function run_postgre_service_systemd run_postgre_service_open_rc
         fi
         
     fi
@@ -58,14 +78,24 @@ unistall_in_arch_based() {
     sudo pacman -Rsn postgresql --noconfirm
 }
 
+function stop_and_disable_postgre_service_systemd() {
+    sudo systemctl stop postgresql.service
+    sudo systemctl disable postgresql.service
+}
+
+function stp_and_disable_postgre_service_open_rc() {
+    sudo rc-service postgresql stop
+    sudo rc-update del postgresql
+}
+
 function unistall_postgre() {
     echo -e "\nVerifing Postgre"
     if [ "$(which psql)" == "" ]; then
         echo "Postgres not is install"
     else
 	echo -e "\nUninstalling postgres...."
-        sudo systemctl stop postgresql.service
-    
+        decide_init_and_run_function stop_and_disable_postgre_service_systemd stp_and_disable_postgre_service_open_rc
+
         if [ "$(which apt)" != "" ]; then
             unistall_in_debian_based
         elif [ "$(which pacman)" != "" ]; then
@@ -80,10 +110,19 @@ function unistall_postgre() {
     read -n1 -p "press any key to continue"
 }
 
+function verify_status_postgresql_with_system() {
+    init=$(cat /proc/1/comm)
+    if [ "$init" == "systemd" ]; then
+        echo "systemctl status postgresql.service"
+    elif [ "$init" == "openrc" ] || [ "$init" == "openrc-init" ]
+        echo "rc-service postgresql status"
+    fi
+}
+
 function verify_service() {
 
     if [ "$(which psql)" != "" ]; then
-        state_service=$(systemctl status postgresql | grep Active | awk '{print $2}')
+        state_service=$($(verify_status_postgresql_with_system) | grep Active | awk '{print $2}')
 
 	if [ "$state_service" == "inactive" ]; then
 	    echo "You have active postgresql service"
@@ -174,14 +213,22 @@ function show_backup() {
     echo -e "\n"
 }
 
+function start_service_systemd() {
+    sudo systemctl start postgresql.service
+}
+
+function start_service_openrc() {
+    sudo rc-service start postgresql
+}
+
 function start_service() {
 
     if [ "$(which psql)" != "" ]; then
-        state_service=$(systemctl status postgresql | grep Active | awk '{print $2}')
+        state_service=$($(verify_status_postgresql_with_system) | grep Active | awk '{print $2}')
 
 	if [ "$state_service" == "inactive" ]; then
 	    echo "Starting service of postgresql"
-            sudo systemctl start postgresql
+            decide_init_and_run_function start_service_systemd start_service_openrc
 	else
 	    echo "The Service postgresql in active"
         fi
