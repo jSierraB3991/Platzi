@@ -72,9 +72,19 @@ function verify_container() {
     fi
 }
 
+
+function what_image() {
+    container_image=$1
+    if [ "$(which docker)" != "" ]; then
+        echo "$container_image"
+    elif [ "$(which podman)" != "" ]; then
+        echo "docker.io/library/$container_image"
+    fi
+}
+
 function run_mongo_inscription() {
     echo -e "\e[32mRUN CONTAINER mongo-inscription\e[0m"
-    sudo $(what_container) run --rm -d -p 27017:27017 --name mongo-inscription mongo:5.0.3-focal
+    sudo $(what_container) run --rm -d -p 27017:27017 --name mongo-inscription $(what_image mongo):5.0.3-focal
 }
 
 function run-postgre-database(){

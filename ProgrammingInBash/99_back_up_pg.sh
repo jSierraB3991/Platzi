@@ -69,7 +69,7 @@ function unistall_postgre() {
         if [ "$(which apt)" != "" ]; then
             unistall_in_debian_based
         elif [ "$(which pacman)" != "" ]; then
-            install_on_arch_based
+            unistall_in_arch_based
         fi
 
         sudo rm -r /var/lib/postgres
