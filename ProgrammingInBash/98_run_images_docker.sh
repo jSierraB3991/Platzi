@@ -2,8 +2,6 @@
 
 folder=$(echo "${PWD}")
 
-
-
 function what_container() {
     if [ "$(which docker)" != "" ]; then
         echo "docker"
@@ -39,15 +37,13 @@ function remove_stop_container(){
 function verify_container() {
     container=$1
     function=$2
-    verify_run_container $container
 
+    verify_run_container $container
     if [ "$?" == "1" ]; then
         read -n1 -p "Already container $container is run, do you like kill?: Y/n " kill_container
         echo ""
-
         if [ "$kill_container" == "y" ] || [ "$kill_container" == "Y" ] || 
             [ "$kill_container" == "" ]; then
-
             container_provider=$(what_container)
             id_container="$( \
                 sudo $container_provider ps --format "{{.ID}}\t.{{.Names}}" \
@@ -60,7 +56,6 @@ function verify_container() {
                already_exists="$( \
                 sudo $container_provider ps -a --format "{{.ID}}\t.{{.Names}}" \
                     | grep $container | awk '{print $1}')"
- 
             done
             $function
         else
@@ -71,7 +66,6 @@ function verify_container() {
         $function
     fi
 }
-
 
 function what_image() {
     container_image=$1
@@ -211,6 +205,4 @@ else
     else
         error_to_help "Acction Failed $1 $2"
     fi
-
-
 fi
