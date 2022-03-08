@@ -10,7 +10,8 @@ type Pc struct {
 }
 
 func (myPcG Pc) String() string {
-    return fmt.Sprintf("I have %dGB of ram, %dGb of disk and is an %s", myPcG.Ram, myPcG.Disk, myPcG.Brand)
+    return fmt.Sprintf("I have %dGB of ram, %dGb of disk and is an %s", 
+                        myPcG.Ram, myPcG.Disk, myPcG.Brand)
 }
 
 
