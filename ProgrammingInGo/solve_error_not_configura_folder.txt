@@ -1,0 +1,1 @@
+sudo ln -s -f {folder}/ProgrammingInGo/my_package /usr/lib/go/src/
