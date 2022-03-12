@@ -97,6 +97,7 @@ function pg_docker_dbs() {
     verify_container zabud-inscription "run-postgre-database 5432 zabud-inscription"
     verify_container zabud-core "run-postgre-database 5433 zabud-core"
     verify_container zabud-notification "run-postgre-database 5434 zabud-notification"
+    verify_container zabud-planning "run-postgre-database 5435 zabud-planning"
 }
 
 function queue_activemq() {
