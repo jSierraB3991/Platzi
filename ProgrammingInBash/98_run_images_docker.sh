@@ -81,23 +81,37 @@ function run_mongo_inscription() {
     sudo $(what_container) run --rm -d -p 27017:27017 --name mongo-inscription $(what_image mongo):5.0.3-focal
 }
 
-function run-postgre-database(){
+function run-postgre-database() {
     container_provider=$(what_container)
-    port=$1
-    name=$2
+    port=5432
+    name=postgre_zabud
+
     volumes=" -v $ZABUD_HOME/data/$name:/var/lib/postgresql/data"
-    enviorment=" -e POSTGRES_USER=postgre -e POSTGRES_DB=$name -e POSTGRES_PASSWORD=root"
+    enviorment=" -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=root"
     configurations=" run --rm -d -p $port:5432 --name $name $volumes $enviorment"
 
     echo -e "\e[32mRUN CONTAINER $name\e[0m"
     sudo $container_provider $configurations postgres:12.9-alpine
+
+
+    script_container=""
+    while [ "$script_container" == "" ]; do
+        script_container=$(sudo $container_provider ps --format {{.ID}}\\t{{.Names}} | grep $name)
+    done
+
+    for db_name in $(echo "zabud_inscription zabud_core zabud_notification zabud_planning"); do
+        db_exists=$(sudo $container_provider exec $name psql -U postgres -lqt | grep $db_name | awk '{print $1}')
+        if [ "$db_exists" == "" ]; then
+            echo -e "\e[32mCreating Datbase $db_name\e[0m"
+            sudo $container_provider exec $name psql -U postgres -c "CREATE DATABASE $db_name"
+        else
+            echo "The database $db_name already exists"
+        fi
+    done
 }
 
 function pg_docker_dbs() {
-    verify_container zabud-inscription "run-postgre-database 5432 zabud-inscription"
-    verify_container zabud-core "run-postgre-database 5433 zabud-core"
-    verify_container zabud-notification "run-postgre-database 5434 zabud-notification"
-    verify_container zabud-planning "run-postgre-database 5435 zabud-planning"
+    verify_container postgre_zabud run-postgre-database 
 }
 
 function queue_activemq() {
@@ -164,7 +178,7 @@ function run_help() {
     echo -e "\nrun_zabud_images.sh [-r [OPTIONS]]" \
         "\noptions | containers configurate:" \
         "\n\tmongo_inscription" \
-        "\n\tpg_docker_dbs | zabud-inscription, zabud-core and zabud-notification" \
+        "\n\tpostgre_zabud" \
         "\n\tqueue_activemq" \
         "\n\tzookeeper_kafka | Zookeeper and Kafka" \
         "\n\tzabud_discovery"
@@ -196,7 +210,7 @@ else
     elif [ $# -eq 2 ] && [ "$1" == "-r" ]; then
         case $2 in
             "mongo_inscription") verify_container mongo-inscription run_mongo_inscription;;
-            "pg_docker_dbs") pg_docker_dbs;;
+            "postgre_zabud") pg_docker_dbs;;
             "queue_activemq") verify_container activemq queue_activemq;;
             "zookeeper_kafka") zookeeper_kafka;;
             "zabud_discovery") verify_container zabud-discovery zabud_discovery;;
