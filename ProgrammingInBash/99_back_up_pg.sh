@@ -34,7 +34,7 @@ function decide_init_and_run_function() {
     init=$(cat /proc/1/comm)
     if [ "$init" == "systemd" ]; then
         $function_systemd
-    elif [ "$init" == "openrc" ] || [ "$init" == "openrc-init" ]
+    elif [ "$init" == "openrc" ] || [ "$init" == "openrc-init" ]; then
         $function_open_rc
     fi
 }
@@ -114,7 +114,7 @@ function verify_status_postgresql_with_system() {
     init=$(cat /proc/1/comm)
     if [ "$init" == "systemd" ]; then
         echo "systemctl status postgresql.service"
-    elif [ "$init" == "openrc" ] || [ "$init" == "openrc-init" ]
+    elif [ "$init" == "openrc" ] || [ "$init" == "openrc-init" ]; then
         echo "rc-service postgresql status"
     fi
 }
