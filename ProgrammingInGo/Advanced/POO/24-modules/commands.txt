@@ -1,0 +1,4 @@
+go get "package"        Get other modules
+    example: go get github.com/donvito/hellomod
+
+go mod tidy             Delete modules unnecesary
