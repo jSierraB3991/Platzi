@@ -21,12 +21,16 @@ func main() {
     channel := make(chan string)
     servers := []string { "platzi.com", "google.com", "facebook.com", "instagram.com" }
     
-    for _, value := range servers {
-        go review_server(value, channel)
-    }
-    for i := 0; i < len(servers); i++ {
+    for {
+        for _, value := range servers {
+            go review_server(value, channel)
+        }
+        time.Sleep(1 * time.Second)
         fmt.Println(<-channel)
     }
+    //for i := 0; i < len(servers); i++ {
+    //    fmt.Println(<-channel)
+    //}
     tiemp_pass := time.Since(start)
     fmt.Printf("Pass tiemp %s\n", tiemp_pass)
 }
