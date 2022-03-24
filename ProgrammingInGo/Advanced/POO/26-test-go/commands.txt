@@ -4,3 +4,6 @@ go test -cover
 go test -coverprofile=coverage.out          // save coverag in the fil
     go tool cover -func=coverage.out
     go tool coer -html=coverage.out
+
+go test -cpuprofile=cpu.out
+go tool pprof cpu.out
