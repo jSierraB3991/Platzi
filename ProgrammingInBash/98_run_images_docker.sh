@@ -93,11 +93,9 @@ function run-postgre-database() {
     echo -e "\e[32mRUN CONTAINER $name\e[0m"
     sudo $container_provider $configurations postgres:12.9-alpine
 
-
-    script_container=""
-    while [ "$script_container" == "" ]; do
-        script_container=$(sudo $container_provider ps --format {{.ID}}\\t{{.Names}} | grep $name)
-    done
+    echo "Sleeping 5 seconds"
+    sleep 5
+    echo "Wake up"
 
     for db_name in $(echo "zabud_inscription zabud_core zabud_notification zabud_planning"); do
         db_exists=$(sudo $container_provider exec $name psql -U postgres -lqt | grep $db_name | awk '{print $1}')
