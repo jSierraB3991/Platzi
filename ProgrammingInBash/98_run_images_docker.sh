@@ -85,6 +85,8 @@ function run-postgre-database() {
     container_provider=$(what_container)
     port=5432
     name=postgre_zabud
+    array_db_names=(zabud_inscription zabud_core zabud_notification zabud_planning)
+    tiemp_of_sleep=4
 
     volumes=" -v $ZABUD_HOME/data/$name:/var/lib/postgresql/data"
     enviorment=" -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -e POSTGRES_PASSWORD=root"
@@ -93,11 +95,11 @@ function run-postgre-database() {
     echo -e "\e[32mRUN CONTAINER $name\e[0m"
     sudo $container_provider $configurations postgres:12.9-alpine
 
-    echo "Sleeping 5 seconds"
-    sleep 5
+    echo "Sleeping $tiemp_of_sleep seconds"
+    sleep $tiemp_of_sleep
     echo "Wake up"
 
-    for db_name in $(echo "zabud_inscription zabud_core zabud_notification zabud_planning"); do
+    for db_name in ${array_db_names[*]}; do
         db_exists=$(sudo $container_provider exec $name psql -U postgres -lqt | grep $db_name | awk '{print $1}')
         if [ "$db_exists" == "" ]; then
             echo -e "\e[32mCreating Datbase $db_name\e[0m"
