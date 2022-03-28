@@ -13,6 +13,7 @@ function what_container() {
 function verify_run_container(){
     container_name=$1
     container_provider=$(what_container)
+    echo -e "\e[32mVerifing if container $container_name is running\e[0m"
     container_run=$(sudo $container_provider ps --format "{{.Names}}" | grep $container_name)
 
     if [ "$container_run" != "" ]; then
@@ -27,10 +28,11 @@ function remove_stop_container(){
     container_run=$(sudo $container_provider ps -a --format "{{.Names}}" | grep $container_name)
 
     if [ "$container_run" != "" ]; then
-        id_container$( \
+        id_container=$( \
             sudo $container_provider ps --format "{{.ID}}\t.{{.Names}}" \
                 | grep $container | awk '{print $1}' )
-        sudo $container_provider rm id_container
+        echo -e "[31mKilling container $container with id $id_container"
+        sudo $container_provider rm $id_container
     fi
 }
 
@@ -42,8 +44,11 @@ function verify_container() {
     if [ "$?" == "1" ]; then
         read -n1 -p "Already container $container is run, do you like kill?: Y/n " kill_container
         echo ""
+
         if [ "$kill_container" == "y" ] || [ "$kill_container" == "Y" ] || 
             [ "$kill_container" == "" ]; then
+
+            echo -e "\e[32mKilling container $container\e[0m"
             container_provider=$(what_container)
             id_container="$( \
                 sudo $container_provider ps --format "{{.ID}}\t.{{.Names}}" \
@@ -126,12 +131,15 @@ function zookeeper_kafka() {
     id_container_of_zookeper=$($script_container | grep zookeeper | awk '{print $1}' )
     id_container_of_kafka=$($script_container | grep kafka | awk '{print $1}' )
 
+    echo -e "\e[32mVerifing container zookeeper\e[0m"
     if [ "$id_container_of_zookeper" == "" ]; then
     echo -e "\e[32mRUN CONTAINER Zookeeper\e[0m"
         sudo $container_provider run --rm --name zookeeper -d -p 2181:2181 wurstmeister/zookeeper
     else
         echo "The container of Zookeeper zookeeper is already exists"
     fi
+
+    echo -e "\e[32mVerifing container Kafka\e[0m"
     if [ "$id_container_of_kafka" == "" ]; then
         ip_private=$(ifconfig wlan0 | grep inet | head -1 | awk '{print $2}')
         enviorment=" -e KAFKA_ADVERTISED_HOST_NAME=localhost"
@@ -153,6 +161,7 @@ function zabud_discovery() {
 
     application="zabud-discovery"
     version="1.0"
+    echo -e "\e[32mSearch Image $application:$version \e[0m"
     dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $application:$version)
     if [ "$dockerimage" == "" ]; then
         read -p "you image $application:$version not exists, Dou you like build image?: " response
