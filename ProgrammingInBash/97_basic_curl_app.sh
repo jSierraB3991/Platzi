@@ -1,13 +1,13 @@
 #! /bin/bash
 
-URL="https://reports-service-dot-academico-qa.appspot.com"
+URL="http://localhost:5000/schedule/dynamic"
 METHOD="-X POST"
 HEADER="-H \"content-type: application/json\""
 BODY=""
 
 if [ "$HEADER" != "" ]; then
     continue="s"
-    BODY="-d {"
+    BODY="-d \"{"
     while [ "$continue" == "s" ]; do
         read -p "What is a key for body: " key
         if [ "$key" != "" ]; then
@@ -22,11 +22,12 @@ if [ "$HEADER" != "" ]; then
         fi
 
         read -p "Continue add body in request: S/n " continue
-        if [ "$continue" == "" ]; then
+        if [ "$continue" == "" ] || [ "$continue" == "S" ]; then
             continue="s"
+            BODY="$BODY, "
         fi
     done
-    BODY=$(echo $BODY "}")
+    BODY=$(echo $BODY "}\"")
 fi
 echo "curl $METHOD $HEADER $BODY $URL"
 curl $METHOD $HEADER $BODY $URL
