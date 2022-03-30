@@ -13,7 +13,7 @@ if [ "$HEADER" != "" ]; then
         if [ "$key" != "" ]; then
             read -p "What is a value for key $key: " value
             if [ "$value" != "" ]; then
-                BODY=$(echo $BODY "\"$key\": \"$value\"" )
+                BODY=$(echo $BODY "\\\"$key\\\": \\\"$value\\\"" )
             else
                 echo "invalid value for $key, no save"
             fi
@@ -29,5 +29,7 @@ if [ "$HEADER" != "" ]; then
     done
     BODY=$(echo $BODY "}\"")
 fi
-echo "curl $METHOD $HEADER $BODY $URL"
-curl $METHOD $HEADER $BODY $URL
+REQUEST=$(echo "curl $METHOD $HEADER $BODY $URL")
+echo $REQUEST | xclip -sel clip
+echo "$REQUEST al cortapapeles"
+
