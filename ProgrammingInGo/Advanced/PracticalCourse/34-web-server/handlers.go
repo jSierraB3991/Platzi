@@ -5,6 +5,10 @@ import (
     "fmt"
 )
 
-func handlerRoot(w http.ResposeWriter, r *http.Request) {
+func HandlerRoot(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "Hello world")
+}
+
+func HandlerHome(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "This is th API Enpoint")
 }
