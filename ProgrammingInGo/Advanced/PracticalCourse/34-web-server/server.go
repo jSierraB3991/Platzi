@@ -20,6 +20,13 @@ func (s *Server) Handle(path string, handler http.HandlerFunc) {
     s.router.rules[path] = handler
 }
 
+func (s *Server) AddMiddleware(f http.HandlerFunc, middleawares ...Middleware) http.HandlerFunc {
+    for _, m := range middleawares {
+        f = m(f)
+    }
+    return f
+}
+
 func (s *Server) Listen() error {
     http.Handle("/", s.router)
     err := http.ListenAndServe(s.port, nil)
