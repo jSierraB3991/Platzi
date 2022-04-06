@@ -141,8 +141,8 @@ function zookeeper_kafka() {
 
     echo -e "\e[32mVerifing container Kafka\e[0m"
     if [ "$id_container_of_kafka" == "" ]; then
-        ip_private=$(ifconfig wlan0 | grep inet | head -1 | awk '{print $2}')
-        enviorment=" -e KAFKA_ADVERTISED_HOST_NAME=localhost"
+        ip_private=$(ip add | grep wlp3s0 | grep inet | awk '{print $2}' | awk 'BEGIN{FS="/"} {print $1}')
+        enviorment=" -e KAFKA_ADVERTISED_HOST_NAME=$ip_private"
         enviorment="$enviorment -e KAFKA_ZOOKEEPER_CONNECT=$ip_private:2181"
         configurations="--rm --name kafka -d -p 9092:9092 $enviorment"
         echo -e "\e[32mRUN CONTAINER Kafka\e[0m"
@@ -206,7 +206,7 @@ else
     if [ $# -eq 0 ]; then
         verify_container mongo-inscription run_mongo_inscription
         pg_docker_dbs
-        verify_container activemq queue_activemq
+        #verify_container activemq queue_activemq
         zookeeper_kafka
         verify_container zabud-discovery zabud_discovery
 
