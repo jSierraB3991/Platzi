@@ -125,6 +125,12 @@ function queue_activemq() {
 }
 
 function zookeeper_kafka() {
+    network_interface=""
+    if [ "$(ip add | grep wlp3s0)" != "" ]; then
+        network_interface="wlp3s0"
+    elif [ "$(ip add | grep wlan)" != "" ]; then
+        network_interface="wlan"
+    fi
 
     container_provider=$(what_container)
     script_container="sudo $container_provider ps --format {{.ID}}\t{{.Names}}"
@@ -141,7 +147,7 @@ function zookeeper_kafka() {
 
     echo -e "\e[32mVerifing container Kafka\e[0m"
     if [ "$id_container_of_kafka" == "" ]; then
-        ip_private=$(ip add | grep wlp3s0 | grep inet | awk '{print $2}' | awk 'BEGIN{FS="/"} {print $1}')
+        ip_private=$(ip add | grep $network_interface | grep inet | awk '{print $2}' | awk 'BEGIN{FS="/"} {print $1}')
         enviorment=" -e KAFKA_ADVERTISED_HOST_NAME=$ip_private"
         enviorment="$enviorment -e KAFKA_ZOOKEEPER_CONNECT=$ip_private:2181"
         configurations="--rm --name kafka -d -p 9092:9092 $enviorment"
@@ -153,11 +159,7 @@ function zookeeper_kafka() {
 }
 
 function zabud_discovery() {
-    cd $ZABUD_HOME/zabud-discovery-ms
-    if [ ! -f $ZABUD_HOME/zabud-discovery-ms/Dockerfile ]; then
-        cp $DOT_FILES/Docker/spring-Dockerfile ./Dockerfile
-    fi
-    container_provider=$(what_container)
+   container_provider=$(what_container)
 
     application="zabud-discovery"
     version="1.0"
@@ -171,6 +173,9 @@ function zabud_discovery() {
            [ $response == "Y" ] || 
            [ $response == "S" ]; then
             cd $ZABUD_HOME/zabud-discovery-ms
+            if [ ! -f $ZABUD_HOME/zabud-discovery-ms/Dockerfile ]; then
+                cp $DOT_FILES/Docker/spring-Dockerfile ./Dockerfile
+            fi
             echo -e "\e[32mGenerate Image zabud-discovery\e[0m"
             sudo $container_provider build -t zabud-discovery:1.0 .
         fi
