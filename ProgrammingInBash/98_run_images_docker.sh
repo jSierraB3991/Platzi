@@ -128,8 +128,8 @@ function zookeeper_kafka() {
     network_interface=""
     if [ "$(ip add | grep wlp3s0)" != "" ]; then
         network_interface="wlp3s0"
-    elif [ "$(ip add | grep wlan)" != "" ]; then
-        network_interface="wlan"
+    elif [ "$(ip add | grep wlan0)" != "" ]; then
+        network_interface="wlan0"
     fi
 
     container_provider=$(what_container)
