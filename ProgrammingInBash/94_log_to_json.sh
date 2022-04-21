@@ -13,7 +13,7 @@ if [ ! -f $file ]; then
     exit 1
 fi
 
-STRING_EXIT="{"
+echo "{"
 file2=$(echo "/home/juan-sierra/file2.txt")
 if [ ! -f $file2 ]; then
     touch $file2
@@ -41,5 +41,4 @@ do
 done < $file2
 
 echo -e "\e[32m Parsed Sucessfull \e[0m"
-echo "$STRING_EXIT"
 echo "}"
