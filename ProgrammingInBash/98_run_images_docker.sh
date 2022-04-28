@@ -229,6 +229,12 @@ function error_to_help() {
     run_help
 }
 
+isRunning=$(systemctl status docker | grep Active | awk '{print $2}' )
+if [ "$isRunning" == "inactive" ]; then
+    echo "running docker"
+    sudo systemctl start docker
+fi
+
 if [ -z $ZABUD_HOME ]; then
     echo "I Need enviroment varible ZABUD_HOME"
 elif [ -z $DOT_FILES ]; then
