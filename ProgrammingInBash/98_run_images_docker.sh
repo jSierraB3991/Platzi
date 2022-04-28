@@ -239,8 +239,6 @@ else
         pg_docker_dbs
         #verify_container activemq queue_activemq
         zookeeper_kafka
-        verify_container zabud-discovery zabud_discovery
-        verify_container zabud-tronos-core zabud_tronos_core
 
     elif [ $# -eq 1 ]; then
         if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
