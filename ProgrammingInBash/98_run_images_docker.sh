@@ -229,10 +229,11 @@ function error_to_help() {
     run_help
 }
 
-isRunning=$(systemctl status docker | grep Active | awk '{print $2}' )
+container=$(what_container)
+isRunning=$(systemctl status $container | grep Active | awk '{print $2}' )
 if [ "$isRunning" == "inactive" ]; then
-    echo "running docker"
-    sudo systemctl start docker
+    echo "running $container"
+    sudo systemctl start $container
 fi
 
 if [ -z $ZABUD_HOME ]; then
