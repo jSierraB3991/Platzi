@@ -124,13 +124,18 @@ function queue_activemq() {
     sudo $(what_container) run --rm --name activemq -d -p 8161:8161 -p 61616:61616 rmohr/activemq:5.14.0-alpine
 }
 
-function zookeeper_kafka() {
+function get_ip() {
     network_interface=""
     if [ "$(ip add | grep wlp3s0)" != "" ]; then
         network_interface="wlp3s0"
     elif [ "$(ip add | grep wlan0)" != "" ]; then
         network_interface="wlan0"
     fi
+    echo $(ip add | grep $network_interface | grep inet | awk '{print $2}' | awk 'BEGIN{FS="/"} {print $1}')
+}
+
+function zookeeper_kafka() {
+
 
     container_provider=$(what_container)
     script_container="sudo $container_provider ps --format {{.ID}}\t{{.Names}}"
@@ -147,7 +152,7 @@ function zookeeper_kafka() {
 
     echo -e "\e[32mVerifing container Kafka\e[0m"
     if [ "$id_container_of_kafka" == "" ]; then
-        ip_private=$(ip add | grep $network_interface | grep inet | awk '{print $2}' | awk 'BEGIN{FS="/"} {print $1}')
+        ip_private=$(get_ip)
         enviorment=" -e KAFKA_ADVERTISED_HOST_NAME=$ip_private"
         enviorment="$enviorment -e KAFKA_ZOOKEEPER_CONNECT=$ip_private:2181"
         configurations="--rm --name kafka -d -p 9092:9092 $enviorment"
@@ -158,34 +163,54 @@ function zookeeper_kafka() {
     fi
 }
 
-function zabud_discovery() {
-   container_provider=$(what_container)
+function create_image_zabud() {
+    name_repo=$1
+    port_out=$2
+    port_in=$3
+    db=$4
+    container_provider=$(what_container)
 
-    application="zabud-discovery"
     version="1.0"
-    echo -e "\e[32mSearch Image $application:$version \e[0m"
-    dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $application:$version)
+    echo -e "\e[32mSearch Image $name_repo:$version \e[0m"
+    dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $name_repo:$version)
     if [ "$dockerimage" == "" ]; then
-        read -p "you image $application:$version not exists, Dou you like build image?: " response
+        read -p "you image $name_repo:$version not exists, Dou you like build image?: " response
 
         if [ $response == "y" ] || 
            [ $response == "s" ] || 
            [ $response == "Y" ] || 
            [ $response == "S" ]; then
-            cd $ZABUD_HOME/zabud-discovery-ms
-            if [ ! -f $ZABUD_HOME/zabud-discovery-ms/Dockerfile ]; then
-                cp $DOT_FILES/Docker/spring-Dockerfile ./Dockerfile
+            if [ -d $ZABUD_HOME/$name_repo ]; then 
+                cd $ZABUD_HOME/$name_repo
+                if [ ! -f $ZABUD_HOME/$name_repo/Dockerfile ]; then
+                    cp $DOT_FILES/Docker/spring-Dockerfile ./Dockerfile
+                fi
+                echo -e "\e[32mGenerate Image $name_repo\e[0m"
+                sudo $container_provider build -t $name_repo:1.0 .
+            else
+                echo "The repo $name_repo is not exists in $ZABUD_HOME"
             fi
-            echo -e "\e[32mGenerate Image zabud-discovery\e[0m"
-            sudo $container_provider build -t zabud-discovery:1.0 .
         fi
     fi
-    dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $application:$version)
+    dockerimage=$(sudo $container_provider images --format "{{.Repository}}" $name_repo:$version)
     if [ "$dockerimage" != "" ]; then
-        echo -e "\e[32mRUN CONTAINER $application\e[0m"
-        sudo $container_provider run --rm -d -p 8761:8761 --name $application $application:$version
+        echo -e "\e[32mRUN CONTAINER $name_repo\e[0m"
+        db_connection=""
+        if [ $db != "" ]; then
+            db_connection=" -e POSTGRE_DB=$db -e KAFKA=$db -e ACTIVEMQ=$db -e DISCOVERY=$db"
+        fi
+        echo $db_connection
+        sudo $container_provider run --rm -d $db_connection -p $port_out:$port_in --name $name_repo $name_repo:$version
     fi
     cd $folder
+}
+
+function zabud_discovery() {
+    create_image_zabud zabud-discovery-ms 8761 8761
+}
+
+function zabud_tronos_core() {
+    create_image_zabud zabud-tronos-core-ms 8081 8081 $( get_ip )
 }
 
 function run_help() {
@@ -195,7 +220,8 @@ function run_help() {
         "\n\tpostgre_zabud" \
         "\n\tqueue_activemq" \
         "\n\tzookeeper_kafka | Zookeeper and Kafka" \
-        "\n\tzabud_discovery"
+        "\n\tzabud_discovery" \
+        "\n\tzabud_tronos_core"
 }
 
 function error_to_help() {
@@ -214,6 +240,7 @@ else
         #verify_container activemq queue_activemq
         zookeeper_kafka
         verify_container zabud-discovery zabud_discovery
+        verify_container zabud-tronos-core zabud_tronos_core
 
     elif [ $# -eq 1 ]; then
         if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
@@ -228,6 +255,7 @@ else
             "queue_activemq") verify_container activemq queue_activemq;;
             "zookeeper_kafka") zookeeper_kafka;;
             "zabud_discovery") verify_container zabud-discovery zabud_discovery;;
+            "zabud_tronos_core") verify_container zabud-tronos-core-ms zabud_tronos_core;;
             *)  error_to_help "The container $2 not configurate";;
         esac
 
