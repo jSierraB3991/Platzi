@@ -82,15 +82,16 @@ function what_image() {
 }
 
 function run_mongo_inscription() {
+    volumes=" -v $ZABUD_HOME/data/mongo_inscription:/data/db"
     echo -e "\e[32mRUN CONTAINER mongo-inscription\e[0m"
-    sudo $(what_container) run --rm -d -p 27017:27017 --name mongo-inscription $(what_image mongo):5.0.3-focal
+    sudo $(what_container) run --rm -d -p 27017:27017 $volumes --name mongo-inscription $(what_image mongo):5.0.3-focal
 }
 
 function run-postgre-database() {
     container_provider=$(what_container)
     port=5432
     name=postgre_zabud
-    array_db_names=(zabud_inscription zabud_core zabud_notification zabud_planning)
+    array_db_names=(zabud_inscription zabud_core zabud_notification zabud_planning zabud_ifinancial)
     tiemp_of_sleep=4
 
     volumes=" -v $ZABUD_HOME/data/$name:/var/lib/postgresql/data"
@@ -196,8 +197,8 @@ function create_image_zabud() {
     if [ "$dockerimage" != "" ]; then
         echo -e "\e[32mRUN CONTAINER $name_repo\e[0m"
         db_connection=""
-        if [ $db != "" ]; then
-            db_connection=" -e POSTGRE_DB=$db -e KAFKA=$db -e ACTIVEMQ=$db -e DISCOVERY=$db"
+        if [ "$db" != "" ]; then
+            db_connection="-e POSTGRE_DB=$db -e KAFKA=$db -e ACTIVEMQ=$db -e DISCOVERY=$db -e MONGO=$db"
         fi
         echo $db_connection
         sudo $container_provider run --rm -d $db_connection -p $port_out:$port_in --name $name_repo $name_repo:$version
@@ -213,6 +214,14 @@ function zabud_tronos_core() {
     create_image_zabud zabud-tronos-core-ms 8081 8081 $( get_ip )
 }
 
+function zabud_tronos_reports() {
+    create_image_zabud zabud-tronos-reports-ms 5000 5000 $( get_ip )
+}
+
+function zabud_tronos_planning() {
+    create_image_zabud zabud-tronos-planning-ms 8082 8082 $( get_ip )
+}
+
 function run_help() {
     echo -e "\nrun_zabud_images.sh [-r [OPTIONS]]" \
         "\noptions | containers configurate:" \
@@ -221,6 +230,8 @@ function run_help() {
         "\n\tqueue_activemq" \
         "\n\tzookeeper_kafka | Zookeeper and Kafka" \
         "\n\tzabud_discovery" \
+        "\n\tzabud_tronos_reports" \
+        "\n\tzabud_tronos_planning" \
         "\n\tzabud_tronos_core"
 }
 
@@ -232,7 +243,7 @@ function error_to_help() {
 container=$(what_container)
 isRunning=$(systemctl status $container | grep Active | awk '{print $2}' )
 if [ "$isRunning" == "inactive" ]; then
-    echo "running $container"
+    echo "running $contareports"
     sudo systemctl start $container
 fi
 
@@ -261,6 +272,8 @@ else
             "zookeeper_kafka") zookeeper_kafka;;
             "zabud_discovery") verify_container zabud-discovery zabud_discovery;;
             "zabud_tronos_core") verify_container zabud-tronos-core-ms zabud_tronos_core;;
+            "zabud_tronos_reports") verify_container zabud-tronos-reports-ms zabud_tronos_reports;;
+            "zabud_tronos_planning") verify_container zabud-tronos-planning-ms zabud_tronos_planning;;
             *)  error_to_help "The container $2 not configurate";;
         esac
 
