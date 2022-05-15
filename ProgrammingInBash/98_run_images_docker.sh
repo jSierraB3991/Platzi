@@ -87,6 +87,11 @@ function run_mongo_inscription() {
     sudo $(what_container) run --rm -d -p 27017:27017 $volumes --name mongo-inscription $(what_image mongo):5.0.3-focal
 }
 
+function run_mysql_database() {
+    mysql_data="mysql_database"
+    sudo $(what_container) run --rm -d -p 3306:3306 --name $mysql_data -v $ZABUD_HOME/data/$mysql_data:/var/lib/mysql -e MARIADB_USER=mariadb -e MARIADB_ROOT_PASSWORD=chroot -e MARIADB_PASSWORD=root mariadb:10.6.5-focal
+}
+
 function run-postgre-database() {
     container_provider=$(what_container)
     port=5432
@@ -232,6 +237,7 @@ function run_help() {
         "\n\tzabud_discovery" \
         "\n\tzabud_tronos_reports" \
         "\n\tzabud_tronos_planning" \
+        "\n\tmysql_database" \
         "\n\tzabud_tronos_core"
 }
 
@@ -274,6 +280,7 @@ else
             "zabud_tronos_core") verify_container zabud-tronos-core-ms zabud_tronos_core;;
             "zabud_tronos_reports") verify_container zabud-tronos-reports-ms zabud_tronos_reports;;
             "zabud_tronos_planning") verify_container zabud-tronos-planning-ms zabud_tronos_planning;;
+            "mysql_database") verify_container mysql_database run_mysql_database;;
             *)  error_to_help "The container $2 not configurate";;
         esac
 
