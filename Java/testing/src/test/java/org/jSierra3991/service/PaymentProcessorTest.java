@@ -1,6 +1,8 @@
-package org.jsierra3991.payments.service;
+package org.jSierra3991.service;
 
 import org.jsierra3991.payments.models.PaymentResponse;
+import org.jsierra3991.payments.service.PaymentGateWay;
+import org.jsierra3991.payments.service.PaymentProcessor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

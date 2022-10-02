@@ -1,5 +1,6 @@
-package org.jsierra3991;
+package org.jSierra3991;
 
+import org.jsierra3991.DateUtils;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
