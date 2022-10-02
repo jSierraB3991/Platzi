@@ -1,4 +1,4 @@
-package org.jsierra3991;
+package org.jSierra3991;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

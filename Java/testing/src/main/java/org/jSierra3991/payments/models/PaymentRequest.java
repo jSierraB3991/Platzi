@@ -1,4 +1,4 @@
-package org.jsierra3991.payments.models;
+package org.jSierra3991.payments.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PaymentResponse {
-    private PaymentStatus status;
+public class PaymentRequest {
+    private double amount;
 }

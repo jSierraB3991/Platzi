@@ -1,4 +1,4 @@
-package org.jsierra3991.payments.models;
+package org.jSierra3991.payments.models;
 
 public enum PaymentStatus {
     OK,

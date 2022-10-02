@@ -1,20 +1,20 @@
 package org.jSierra3991.service;
 
-import org.jsierra3991.payments.models.PaymentResponse;
-import org.jsierra3991.payments.service.PaymentGateWay;
-import org.jsierra3991.payments.service.PaymentProcessor;
+import org.jSierra3991.payments.models.PaymentResponse;
+import org.jSierra3991.payments.service.PaymentGateWay;
+import org.jSierra3991.payments.service.PaymentProcessor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.jsierra3991.payments.models.PaymentStatus.ERROR;
+import static org.jSierra3991.payments.models.PaymentStatus.ERROR;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.jsierra3991.payments.models.PaymentStatus.OK;
+import static org.jSierra3991.payments.models.PaymentStatus.OK;
 
 //org.mockito.junit.jupiter.MockitoExtension;
 //org.junit.jupiter.api.extension.ExtendWith;

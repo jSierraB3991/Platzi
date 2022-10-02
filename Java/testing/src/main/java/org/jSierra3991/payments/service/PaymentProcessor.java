@@ -1,8 +1,8 @@
-package org.jsierra3991.payments.service;
+package org.jSierra3991.payments.service;
 
 import lombok.RequiredArgsConstructor;
-import org.jsierra3991.payments.models.PaymentRequest;
-import org.jsierra3991.payments.models.PaymentStatus;
+import org.jSierra3991.payments.models.PaymentRequest;
+import org.jSierra3991.payments.models.PaymentStatus;
 
 @RequiredArgsConstructor
 public class PaymentProcessor {

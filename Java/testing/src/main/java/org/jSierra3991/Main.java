@@ -1,4 +1,4 @@
-package org.jsierra3991;
+package org.jSierra3991;
 
 public class Main {
     public static void main(String[] args) {
