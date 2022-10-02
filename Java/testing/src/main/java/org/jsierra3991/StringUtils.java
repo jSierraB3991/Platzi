@@ -1,6 +1,6 @@
 package org.jsierra3991;
 
-public class RepeatValues {
+public class StringUtils {
 
     public static String repeatString(String string, int times) {
 
