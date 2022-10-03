@@ -36,7 +36,7 @@ public class MovieServiceTest {
         var list = service.findByGenre(COMEDY);
         assertFalse(list.isEmpty());
         assertTrue(list.stream().allMatch(m -> m.getGenre().equals(COMEDY)));
-        assertEquals(4, list.size());
+        assertEquals(2, list.size());
     }
 
     @Test
@@ -44,10 +44,10 @@ public class MovieServiceTest {
         when(repository.findAll())
                 .thenReturn(dbMovies());
 
-        var list = service.minusToMinutes(150);
+        var list = service.minusToMinutes(149);
         assertFalse(list.isEmpty());
-        assertTrue(list.stream().allMatch(m -> m.getMinutes() <= 150));
-        assertEquals(11, list.size());
+        assertTrue(list.stream().allMatch(m -> m.getMinutes() <= 149));
+        assertEquals(3, list.size());
     }
 
 
