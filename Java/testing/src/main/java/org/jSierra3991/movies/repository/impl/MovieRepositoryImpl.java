@@ -16,7 +16,9 @@ public class MovieRepositoryImpl implements MovieRepository {
 
     @Override
     public Movie findById(Integer id) {
-        return null;
+        RowMapper<Movie> rowMapper = getMovieRowMapper();
+        var list = jdbcTemplate.query("SELECT * FROM movie WHERE id = ?",  rowMapper, id);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override
@@ -36,6 +38,8 @@ public class MovieRepositoryImpl implements MovieRepository {
 
     @Override
     public Movie saveOrUpdate(Movie movie) {
-        return null;
+        Object[] args = { movie.getName(), movie.getMinutes(), movie.getGenre().name() };
+        jdbcTemplate.update("INSERT INTO movie (name, minutes, genre) VALUES(?, ?, ?);", args);
+        return movie;
     }
 }
