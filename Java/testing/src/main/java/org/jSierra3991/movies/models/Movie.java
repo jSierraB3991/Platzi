@@ -12,10 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "id")
 public class Movie {
     private Integer id;
     private String name;
     private Integer minutes;
     private Genre genre;
+    private String director;
 }

@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class MovieRepositoryImpl implements MovieRepository {
@@ -32,14 +33,30 @@ public class MovieRepositoryImpl implements MovieRepository {
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .minutes(rs.getInt("minutes"))
+                .director(rs.getString("director"))
                 .genre(Genre.valueOf(rs.getString("genre")))
                 .build();
     }
 
     @Override
-    public Movie saveOrUpdate(Movie movie) {
-        Object[] args = { movie.getName(), movie.getMinutes(), movie.getGenre().name() };
-        jdbcTemplate.update("INSERT INTO movie (name, minutes, genre) VALUES(?, ?, ?);", args);
-        return movie;
+    public List<Movie> findByName(String name) {
+        var list = findAll();
+        return list.stream()
+                .filter(m -> m.getName().toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Movie> findByDirector(String director) {
+        var list = findAll();
+        return list.stream()
+                .filter(m -> m.getDirector().toLowerCase().contains(director.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void saveOrUpdate(Movie movie) {
+        Object[] args = { movie.getName(), movie.getMinutes(), movie.getGenre().name(), movie.getDirector()};
+        jdbcTemplate.update("INSERT INTO movie (name, minutes, genre, director) VALUES(?, ?, ?, ?);", args);
     }
 }

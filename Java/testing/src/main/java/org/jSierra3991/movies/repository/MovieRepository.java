@@ -8,7 +8,11 @@ public interface MovieRepository {
 
     Movie findById(Integer id);
 
+    List<Movie> findByName(String name);
+
+    List<Movie> findByDirector(String director);
+
     List<Movie> findAll();
 
-    Movie saveOrUpdate(Movie movie);
+    void saveOrUpdate(Movie movie);
 }

@@ -43,29 +43,46 @@ public class MovieRepositoryTest {
     }
 
     public List<Movie> dbMovies() {
-        return  List.of(Movie.builder().id(1).name("Dark Knight").minutes(150).genre(ACTION).build(),
-                Movie.builder().id(2).name("Memento").minutes(150).genre(THRILLER).build(),
-                Movie.builder().id(3).name("There Something About Mary").minutes(119).genre(COMEDY).build(),
-                Movie.builder().id(4).name("Super 8").minutes(112).genre(THRILLER).build(),
-                Movie.builder().id(5).name("Scream").minutes(150).genre(HORROR).build(),
-                Movie.builder().id(6).name("Home Alone").minutes(150).genre(COMEDY).build(),
-                Movie.builder().id(7).name("Matrix").minutes(136).genre(ACTION).build());
+        return  List.of(Movie.builder().id(1).name("Dark Knight").minutes(150).genre(ACTION).director("Steven").build(),
+                Movie.builder().id(2).name("Memento").minutes(150).genre(THRILLER).director("Spielberg").build(),
+                Movie.builder().id(3).name("There Something About Mary").minutes(119).genre(COMEDY).director("Cano").build(),
+                Movie.builder().id(4).name("Super 8").minutes(112).genre(THRILLER).director("Cesar").build(),
+                Movie.builder().id(5).name("Superman").minutes(150).genre(HORROR).director("Juanes").build(),
+                Movie.builder().id(6).name("Scream").minutes(150).genre(HORROR).director("Caicedo").build(),
+                Movie.builder().id(7).name("Home Alone").minutes(150).genre(COMEDY).director("Dominic").build(),
+                Movie.builder().id(8).name("Matrix").minutes(136).genre(ACTION).director("Duber").build());
     }
 
     @Test
     public void find_movie_by_id() {
         var result = repository.findById(3);
-        assertThat(result, is(Movie.builder().id(3).name("There Something About Mary").minutes(119).genre(COMEDY).build()));
+        assertThat(result,
+                is(Movie.builder().id(3).name("There Something About Mary").minutes(119).genre(COMEDY).director("Cano").build()));
     }
 
     @Test
     public void insert_movie_in_database() {
-        var movie = Movie.builder().genre(DRAMA).minutes(239).name("Clannad").build();
+        var movie = Movie.builder().genre(DRAMA).minutes(239).name("Clannad").director("Juanes").build();
         repository.saveOrUpdate(movie);
 
-        var result = repository.findById(8);
-        movie.setId(8);
+        var result = repository.findById(9);
         assertThat(result, is(movie));
+    }
+
+    @Test
+    public void find_movie_by_name() {
+        var result = repository.findByName("sUpER");
+        assertThat(result,
+                is(List.of(Movie.builder().id(4).name("Super 8").minutes(112).genre(THRILLER).director("Cesar").build(),
+                        Movie.builder().id(5).name("Superman").minutes(150).genre(HORROR).director("Juanes").build())));
+    }
+
+    @Test
+    public void find_movie_by_director() {
+        var result = repository.findByDirector("cA");
+        assertThat(result,
+                is(List.of(Movie.builder().id(3).name("There Something About Mary").minutes(119).genre(COMEDY).director("Cano").build(),
+                        Movie.builder().id(6).name("Scream").minutes(150).genre(HORROR).director("Caicedo").build())));
     }
 
     @After
