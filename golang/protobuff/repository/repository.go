@@ -17,10 +17,10 @@ func SetRepository(repository Repository) {
 	impl = repository
 }
 
-func SetStudent(ctx context.Context, student *models.Student) {
-	return impl.SetSetudent(ctx, student)
+func SetStudent(ctx context.Context, student *models.Student) error {
+	return impl.SetStudent(ctx, student)
 }
 
-func GetStudent(ctx context.Context, id string) {
+func GetStudent(ctx context.Context, id string) (*models.Student, error) {
 	return impl.GetStudent(ctx, id)
 }
