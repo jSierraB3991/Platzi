@@ -40,7 +40,5 @@ func (s *Server) SetStudent(ctx context.Context, req *studentpb.Student) (*stude
 	if err != nil {
 		return nil, err
 	}
-	return &studentpb.SetStudentResponse{
-		Id: student.Id,
-	}, nil
+	return &studentpb.SetStudentResponse{Id: student.Id}, nil
 }

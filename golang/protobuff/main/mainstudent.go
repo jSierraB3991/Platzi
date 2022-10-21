@@ -17,7 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	repo, err := database.NewPostgreRepository("postgres://postgres:root@localhost:5432/platzi_go?sslmode=disable")
+	repo, err := database.NewPostgreRepository("postgres://postgres:root@localhost:5433/platzi_go?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
