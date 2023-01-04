@@ -26,6 +26,12 @@ func (repo *PostgresRepository) SetStudent(ctx context.Context, student *models.
 	return err
 }
 
+func (repo *PostgresRepository) SetQuestion(ctx context.Context, question *models.Question) error {
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO questions(id, answer, question, test_id) VALUES ($1, $2, $3, $4)",
+		question.Id, question.Answer, question.Question, question.TestId)
+	return err
+}
+
 func (repo *PostgresRepository) GetStudent(ctx context.Context, id string) (*models.Student, error) {
 	rows, err := repo.db.QueryContext(ctx, "SELECT id, name, age FROM student WHERE id = $1", id)
 	if err != nil {

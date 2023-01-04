@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"io"
 
 	"github.com/jsierra3991/platzi/proto/models"
 	"github.com/jsierra3991/platzi/proto/repository"
@@ -40,4 +42,33 @@ func (s *ServerTest) SetTest(ctx context.Context, req *testpb.Test) (*testpb.Set
 		return nil, err
 	}
 	return &testpb.SetTestResponse{Id: test.Id}, nil
+}
+
+func (s *ServerTest) SetQuestion(stream testpb.TestService_SetQuestionServer) error {
+	for {
+		fmt.Println("hola")
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: true,
+			})
+		}
+		if err != nil {
+			return err
+		}
+
+		question := &models.Question{
+			Id:       msg.GetId(),
+			Answer:   msg.GetAnswer(),
+			Question: msg.GetQuestion(),
+			TestId:   msg.GetTestId(),
+		}
+		err = s.repo.SetQuestion(context.Background(), question)
+		if err != nil {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: false,
+			})
+		}
+
+	}
 }
