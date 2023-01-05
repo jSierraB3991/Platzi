@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"io"
+	"time"
 
 	"github.com/jsierra3991/platzi/proto/models"
 	"github.com/jsierra3991/platzi/proto/repository"
+	"github.com/jsierra3991/platzi/proto/studentpb"
 	"github.com/jsierra3991/platzi/proto/testpb"
 )
 
@@ -69,4 +71,52 @@ func (s *ServerTest) SetQuestion(stream testpb.TestService_SetQuestionServer) er
 		}
 
 	}
+}
+
+func (s *ServerTest) EnrollStudents(stream testpb.TestService_EnrollStudentsServer) error {
+
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: true,
+			})
+		}
+		if err != nil {
+			return err
+		}
+
+		enrollment := &models.Enrollment{
+			StudentId: msg.GetStudentId(),
+			TestId:    msg.GetTestId(),
+		}
+		err = s.repo.SetEnrollment(context.Background(), enrollment)
+		if err != nil {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: false,
+			})
+		}
+
+	}
+}
+
+func (s *ServerTest) GetStudentPerTest(req *testpb.GetStudentPerTestRequest, stream testpb.TestService_GetStudentPerTestServer) error {
+	students, err := s.repo.GetStudentPerTest(context.Background(), req.GetTestId())
+	if err != nil {
+		return err
+	}
+
+	for _, student := range students {
+		studentProto := &studentpb.Student{
+			Id:   student.Id,
+			Name: student.Name,
+			Age:  student.Age,
+		}
+		err = stream.Send(studentProto)
+		time.Sleep(2 * time.Second)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

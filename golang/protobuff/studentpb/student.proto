@@ -1,8 +1,8 @@
-syntax  = "proto3";
+syntax = "proto3";
 
 package student;
 
-option go_package = "github.com/jsierra3991/platzi/proto;studentpb";
+option go_package = "github.com/jsierra3991/platzi/proto/studentpb";
 
 message Student {
     string id = 1;

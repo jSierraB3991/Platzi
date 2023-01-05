@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/jsierra3991/platzi/proto/models"
 	_ "github.com/lib/pq"
@@ -78,4 +79,35 @@ func (repo *PostgresRepository) SetTest(ctx context.Context, test *models.Test) 
 		test.Id, test.Name)
 	return err
 
+}
+func (repo *PostgresRepository) SetEnrollment(ctx context.Context, enrollment *models.Enrollment) error {
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO enrollment (student_id, test_id) VALUES ($1, $2)",
+		enrollment.StudentId, enrollment.TestId)
+	return err
+}
+func (repo *PostgresRepository) GetStudentPerTest(ctx context.Context, testId string) ([]*models.Student, error) {
+
+	rows, err := repo.db.QueryContext(ctx, "SELECT s.id, s.name, s.age FROM student s INNER JOIN enrollment e ON s.id = e.student_id WHERE e.test_id = $1", testId)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	var students = []*models.Student{}
+
+	for rows.Next() {
+		var student = models.Student{}
+		if err = rows.Scan(&student.Id, &student.Name, &student.Age); err == nil {
+			students = append(students, &student)
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, rows.Err()
+	}
+	return students, nil
 }

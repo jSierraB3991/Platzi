@@ -19,3 +19,11 @@ CREATE TABLE questions (
     answer VARCHAR(255) NOT NULL,
     FOREIGN KEY (test_id) REFERENCES test(id)
 );
+
+DROP TABLE IF EXISTS enrollment;
+CREATE TABLE enrollment (
+    student_id VARCHAR(32),
+    test_id VARCHAR(32),
+    FOREIGN KEY (test_id) REFERENCES test(id),
+    FOREIGN KEY (student_id) REFERENCES student(id)
+);
